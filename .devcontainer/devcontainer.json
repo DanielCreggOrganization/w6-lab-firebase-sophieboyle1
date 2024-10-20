@@ -6,12 +6,12 @@
             "version": "latest"
         }
     },
-    "postCreateCommand": "npm install -g npm@latest",
+    "postStartCommand": "npm install -g npm@latest",
     "customizations": {
         "vscode": {
             "extensions": [
-                "GitHub.copilot@prerelease",
-                "GitHub.copilot-chat@prerelease"
+                "github.copilot@prerelease",
+                "github.copilot-chat@prerelease"
             ]
         }
     }
