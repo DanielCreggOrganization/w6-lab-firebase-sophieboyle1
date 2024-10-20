@@ -1,0 +1,18 @@
+{
+    "name": "Ubuntu base with Ionic CLI latest",
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "features": {
+        "ghcr.io/devcontainers-contrib/features/ionic-cli": {
+            "version": "latest"
+        }
+    },
+    "postCreateCommand": "npm install -g npm@latest",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "GitHub.copilot@prerelease",
+                "GitHub.copilot-chat@prerelease"
+            ]
+        }
+    }
+}
