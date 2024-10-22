@@ -62,17 +62,23 @@ Take a look at your ``main.ts`` file. Make sure you have inputs like shown below
 
 ```typescript
 // main.ts
-export const environment = {
-  production: false,
-  firebase: {
-    apiKey: "your-api-key",
-    authDomain: "your-auth-domain",
-    projectId: "your-project-id",
-    storageBucket: "your-storage-bucket",
-    messagingSenderId: "your-messaging-sender-id",
-    appId: "your-app-id"
-  }
-};
+bootstrapApplication(AppComponent, {
+  providers: [
+    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
+    provideIonicAngular(),
+    provideRouter(routes, withPreloading(PreloadAllModules)),
+    provideFirebaseApp(() => initializeApp({
+      projectId: "fir-ionic-project-dc52e",
+      appId: "1:769063483414:web:0b402d09efd31d324dca57",
+      storageBucket: "fir-ionic-project-dc52e.appspot.com",
+      apiKey: "AIzaSyDibzo0p2mUnQmjN6RlfXlHjbgkzSIUjFY",
+      authDomain: "fir-ionic-project-dc52e.firebaseapp.com",
+      messagingSenderId: "769063383314"
+    })),
+    provideAuth(() => getAuth()),
+    provideFirestore(() => getFirestore()),
+  ],
+});
 ```
 
 ## 2. Authentication Implementation
