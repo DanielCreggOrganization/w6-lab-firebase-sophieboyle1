@@ -1,4 +1,4 @@
-# Firebase Integration with Ionic Angular Lab
+# Firebase Lab
 
 ## Agenda
 
@@ -32,12 +32,15 @@ graph TD
 1. Create Firebase Project:
    - Navigate to [Firebase Console](https://console.firebase.google.com)
    - Click "Add Project"
-   - Name it "firebase-ionic-project"
-   - Disable Google Analytics when prompted
-   
+   - Name it "firebase-ionic-project".
+   - Disable Google Analytics when prompted.
+   - Under Build, add the Authentication service. Select Email/Password.
+   - Under Build, add the Firestore Database service. Start in Test Mode.
+   - Click on project overview and register a web app in your Firebase project called ionic-web-app.
+
 2. Configure Firebase Services:
    ```bash
-   # Create new Ionic project
+   # Create new Ionic standalone project
    ionic start w6-lab-firebase blank --type=angular
 
    # Install required tools
