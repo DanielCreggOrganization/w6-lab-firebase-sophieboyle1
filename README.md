@@ -30,11 +30,12 @@ graph TD
 ### Procedure
 
 1. Create Firebase Project:
-   - Navigate to [Firebase Console](https://console.firebase.google.com)
-   - Click "Add Project"
+   - Navigate to the Firebase website. Hold the ``ctrl`` key on your keyboard and click on this link: [Firebase Console](https://console.firebase.google.com)
+   - Sign in to Firebase.
+   - Click on the "Create a project" tile.
    - Name it "firebase-ionic-project".
-   - Disable Google Analytics when prompted.
-   - Under Build, add the Authentication service. Select Email/Password.
+   - Disable Google Analytics and click the ``Create project`` button. This may take a minute to create.
+   - Click on the ``Build`` dropdown in the left hand panel, select Authentication and click the ``Get started`` button. Select Email/Password. Enable Email/Password and click ``Save``
    - Under Build, add the Firestore Database service. Start in Test Mode.
    - Click on project overview and register a web app in your Firebase project called ``ionic-web-app``.
 
