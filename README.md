@@ -435,17 +435,15 @@ export class TasksService {
 }
 ```
 
-We will use the Home page to dispay all tasks.
+We will use the Home page to dispay all tasks.  
+![tasks image](https://github.com/user-attachments/assets/e6137af5-e7a6-44ea-82e1-6f4ec0fc56c3)
 
 ```typescript
 // src/app/home/home.page.ts
-
+```
 ### DIY Tasks
 
 1. Add a method to toggle the Task completed atribute. 
-
-![tasks image](https://github.com/user-attachments/assets/e6137af5-e7a6-44ea-82e1-6f4ec0fc56c3)
-
 
 ### DIY Tasks
 
