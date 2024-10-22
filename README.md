@@ -628,6 +628,99 @@ export class HomePage implements AfterViewInit {
   }
 }
 ```
+Here is the Template for the home page
+```html
+<!-- Add a header to the page with a logout button and the title "My Tasks" -->
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title> My Tasks </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <!-- The tasks array is an observable that emits an array of tasks. The | async pipe is used to subscribe 
+         to the tasks observable and unwrap the emitted value. The home.page.html file knows about the tasks 
+         property because it is bound to it using the *ngFor directive. The *ngFor directive is used to loop 
+         over the tasks array and generate HTML elements for each task.-->
+    <ion-item-sliding *ngFor = "let task of tasks$ | async">
+      <ion-item>
+        <!-- Display the task content -->
+        <ion-label>
+          <h3>{{task.content}}</h3>
+        </ion-label>
+        <!-- Display a checkbox to mark the task as completed. Use event binding that listens for the ionChange event. 
+             This event is emitted by Ionic components when their value changes (i.e. the tick box is checked or unchecked)
+             [checked]="task.completed" is an example of property binding.the checked property of an element is being bound
+             to the completed property of the task object   -->
+        <ion-checkbox
+          slot="end"
+          (ionChange)="toggleTask($event, task)"
+          [checked]="task.completed"
+          aria-label="Task checkbox"
+        >
+        </ion-checkbox>
+      </ion-item>
+      <!-- Create a sliding button to edit the task title or delete the task -->
+      <ion-item-options side="end">
+        <ion-item-option color="primary" (click)="openUpdateInput(task)">
+          <ion-icon name="pencil-outline" slot="icon-only"></ion-icon>
+        </ion-item-option>
+        <ion-item-option color="danger" (click)="deleteTask(task)">
+          <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+        </ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
+
+  <!-- Create a pop up modal to add a new task. Trigger the modal with FAB button created below. -->
+  <!-- #modal is used to access the modal in the template -->
+  <ion-modal trigger="open-modal" #modal>
+    <!-- ng-template is used with the ViewChild decorator to create a template reference variable, 
+         which is then used to present the modal. The ViewChild decorator is used to access the modal
+         in the component class. The #modal variable is used to access the modal in the template.-->
+    <ng-template>
+      <!-- In the modal, create an input to enter a new task. Use two-way binding to bind the input to the newTask property -->
+      <ion-item>
+        <ion-label position="stacked">New Task</ion-label>
+        <ion-input
+          type="text"
+          placeholder="Enter task content here..."
+          [(ngModel)]="newTask.content"
+        ></ion-input>
+      </ion-item>
+
+      <!-- Add buttons in the modal to save or cancel the task entry. Place them side by side using rows and columns. -->
+      <ion-row>
+        <ion-col>
+          <ion-button (click)="addTask()" color="primary" expand="full">
+            Save
+          </ion-button>
+        </ion-col>
+        <ion-col>
+          <ion-button (click)="cancel()" color="danger" expand="full">
+            Cancel
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ng-template>
+  </ion-modal>
+
+  <!-- FAB = Floating Action Button. This creates a button that is always visible on the screen.
+       The button contains a plus symbol and is used to add a new task -->
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button id="open-modal">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>
+```
+
 ### DIY Tasks
 
 1. Add a method to toggle the Task completed atribute. Use a checkbox as seen in the image above.
