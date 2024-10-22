@@ -36,7 +36,7 @@ graph TD
    - Disable Google Analytics when prompted.
    - Under Build, add the Authentication service. Select Email/Password.
    - Under Build, add the Firestore Database service. Start in Test Mode.
-   - Click on project overview and register a web app in your Firebase project called ionic-web-app.
+   - Click on project overview and register a web app in your Firebase project called ``ionic-web-app``.
 
 2. Configure Firebase Services:
    ```bash
@@ -54,16 +54,10 @@ graph TD
    ng add @angular/fire
    ```
 
-3. Register Web App:
-   - In Firebase Console, click "Project Overview"
-   - Select "Web" (</>)
-   - Register app as "ionic-web-app"
-   - Copy the configuration object
-
 ### Configuration Example
 
 ```typescript
-// src/environments/environment.ts
+// main.ts
 export const environment = {
   production: false,
   firebase: {
@@ -102,6 +96,8 @@ ionic g service auth --standalone
 # Generate login page
 ionic g page login --standalone
 ```
+The login page will look like this:  
+![login page](https://github.com/user-attachments/assets/c1c9cea0-0b45-40fe-95c9-4c7bf8026da5)
 
 ### Auth Service Implementation
 
