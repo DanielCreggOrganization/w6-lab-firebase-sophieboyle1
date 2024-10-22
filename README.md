@@ -97,7 +97,8 @@ ionic g service auth --standalone
 ionic g page login --standalone
 ```
 The login page will look like this:  
-![login page](https://github.com/user-attachments/assets/c1c9cea0-0b45-40fe-95c9-4c7bf8026da5)
+![login page](https://github.com/user-attachments/assets/d5710f9c-d0d3-4043-bd5a-44083b8ba81b)
+
 
 ### Auth Service Implementation
 
