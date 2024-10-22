@@ -54,7 +54,8 @@ graph TD
    ng add @angular/fire
    ```
 
-### Configuration Example
+### Configuration Example  
+Take a look at your ``main.ts`` file. Make sure you have inputs like shown below:
 
 ```typescript
 // main.ts
