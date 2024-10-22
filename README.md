@@ -658,19 +658,10 @@ Here is the Template for the home page
              This event is emitted by Ionic components when their value changes (i.e. the tick box is checked or unchecked)
              [checked]="task.completed" is an example of property binding.the checked property of an element is being bound
              to the completed property of the task object   -->
-        <ion-checkbox
-          slot="end"
-          (ionChange)="toggleTask($event, task)"
-          [checked]="task.completed"
-          aria-label="Task checkbox"
-        >
-        </ion-checkbox>
+
       </ion-item>
       <!-- Create a sliding button to edit the task title or delete the task -->
       <ion-item-options side="end">
-        <ion-item-option color="primary" (click)="openUpdateInput(task)">
-          <ion-icon name="pencil-outline" slot="icon-only"></ion-icon>
-        </ion-item-option>
         <ion-item-option color="danger" (click)="deleteTask(task)">
           <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
         </ion-item-option>
@@ -724,12 +715,9 @@ Here is the Template for the home page
 ### DIY Tasks
 
 1. Add a method to toggle the Task completed atribute. Use a checkbox as seen in the image above.
-
-### DIY Tasks
-
-1. Create a task modal component for adding new tasks.
-2. Implement task editing using the AlertController.
-3. Add slide-to-delete functionality for tasks.
+2. Update *ngFor to @For
+3. Add the toggle ckeck box
+4. Add a sliding button to edit the Task.
 
 ## Common Issues and Troubleshooting
 
