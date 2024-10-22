@@ -35,9 +35,11 @@ graph TD
    - Click on the "Create a project" tile.
    - Name it "firebase-ionic-project".
    - Disable Google Analytics and click the ``Create project`` button. This may take a minute to create.
-   - Click on the ``Build`` dropdown in the left hand panel, select Authentication and click the ``Get started`` button. Select Email/Password. Enable Email/Password and click ``Save``
-   - Under Build, add the Firestore Database service. Start in Test Mode.
-   - Click on project overview and register a web app in your Firebase project called ``ionic-web-app``.
+   - Click on the ``Build`` dropdown in the left hand panel, select ``Authentication`` and click the ``Get started`` button. Select Email/Password. Enable Email/Password and click ``Save``
+   - Click on the ``Build`` dropdown in the left hand panel, select ``Firestore Database`` and click the ``Create database`` button. Select Location as ``europe-west2 (London)``. Select ``Start in test mode`` and click the ``Create`` button.
+   - Click on the Rules tab and change the timestamp date to the last day of the year, December 31st. Click on the ``Publish`` button. 
+   - Click on ``Project Overview`` button in the top left of the page and then click on the Web button marked ``</>``. Register a web app in your Firebase project called ``ionic-web-app``. Click the ``Continue to console`` button.
+   - We will now integrate our new firebase project with our Ionic app using the below procedure.
 
 2. Configure Firebase Services:
    ```bash
