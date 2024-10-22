@@ -281,9 +281,64 @@ export class LoginPage {
   }
 }
 ```
+
+Below is the Login page Template:
+
+```html
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>My App</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- Add a form to the template. ngSubmit event is bound to login() method
+    which will be added to the component class. formGroup directive is bound to
+    credentials property which will be added to the component class. -->
+  <form (ngSubmit)="login()" [formGroup]="credentials">
+    <ion-item class="ion-margin-bottom">
+      <ion-input
+        type="email"
+        placeholder="Email"
+        formControlName="email"
+      ></ion-input>
+      <!-- Note appears to the right of slot if input is invalid. If the email input has been touched and is invalid, display the invalid message -->
+      @if ((email.dirty || email.touched) && email.errors) {
+        <ion-note slot="end">Email is invalid</ion-note>
+      }
+    </ion-item>
+    <!-- Add password input -->
+    <ion-item class="ion-margin-bottom">
+      <ion-input
+        type="password"
+        placeholder="Password"
+        formControlName="password"
+      ></ion-input>
+    
+      <!-- Note appears to the right of the slot if input is invalid -->
+      <ion-note
+        slot="end"
+        *ngIf="(password.dirty || password.touched) && password.errors"
+        >Password needs to contain a minimum 6 characters
+      </ion-note>
+    
+    </ion-item>
+
+    <!-- Add Log in button which is disabled while credentials are invalid -->
+    <ion-button 
+      type="submit" 
+      expand="block" 
+      [disabled]="!credentials.valid"
+      >Log in</ion-button
+    >
+  </form>
+</ion-content>
+```
+
 ### DIY Tasks
 
-1. Implement password reset functionality using Firebase's `sendPasswordResetEmail` method. You will need to update the auth service and the login page. 
+1. Implement password reset functionality using Firebase's `sendPasswordResetEmail` method. You will need to update the auth service and the login page.
+2. Add the Create Account button.
    
 ## 3. Firestore Integration
 
