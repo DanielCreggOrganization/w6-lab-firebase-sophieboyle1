@@ -114,61 +114,85 @@ The login page will look like this:
 
 ```typescript
 // src/app/services/auth.service.ts
+/**
+ * Service responsible for handling authentication operations
+ * including user registration, authentication, password reset, and sign out.
+ */
 import { Injectable, inject } from '@angular/core';
 import {
-  Auth, // Used to get the current user and subscribe to the auth state.
-  createUserWithEmailAndPassword, // Used to create a user in Firebase auth.
-  signInWithEmailAndPassword, // Used to sign in a user with email and password.
-  signOut, // Used to sign out a user.
+  Auth,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  signOut,
+  User,
+  UserCredential,
 } from '@angular/fire/auth';
-import { doc, Firestore, setDoc } from '@angular/fire/firestore'; // Used to interact with Firestore databse. We store user info in Firestore.
+
+/**
+ * Interface for authentication request data
+ */
+interface UserAuthData {
+  email: string;
+  password: string;
+}
 
 @Injectable({
-  providedIn: 'root', // This service is provided in the root injector (AppModule). This means that the service will be available to the entire application.
+  providedIn: 'root'
 })
 export class AuthService {
-  // Inject the Auth and Firestore services. 
-  private auth = inject(Auth); // Inject AngularFireAuth service. We need it to create a user in Firebase auth.
-  private firestore = inject(Firestore);
-  
-  constructor() {}
-  
-  // Sign up with email/password. Creates user in Firebase auth and adds user info to Firestore database
-  async register({ email, password }: { email: string; password: string }) {
-    try {
-      const credentials = await createUserWithEmailAndPassword(
-        this.auth,
-        email,
-        password
-      );
-      // In case the user is created successfully, create a document in `users` collection
-      const ref = doc(this.firestore, `users/${credentials.user.uid}`);
-      setDoc(ref, { email }); // Set the document. Data is written to the database.
-      return credentials;
-    } catch (e) {
-      console.log("Error in register: ", e);
-      return null;
-    }
+  /**
+   * Firebase Authentication instance
+   */
+  private readonly firebaseAuth = inject(Auth);
+
+  /**
+   * Registers a new user with email and password
+   * @param userAuthData - The user's email and password
+   * @returns Promise resolving to UserCredential
+   */
+  async registerUser(userAuthData: UserAuthData): Promise<UserCredential> {
+    return createUserWithEmailAndPassword(
+      this.firebaseAuth,
+      userAuthData.email,
+      userAuthData.password
+    );
   }
 
-  // Sign in with email/password. We pass the email and password as parameters.
-  async login({ email, password }: { email: string; password: string }) {
-    try {
-      // Sign in user. If successful, the user object is returned. Otherwise, null is returned.
-      const credentials = await signInWithEmailAndPassword(
-        this.auth, // <-- Injected AngularFireAuth service
-        email, // <-- Email passed as parameter
-        password // <-- Password passed as parameter
-      );
-      return credentials; // <-- Return the user object
-    } catch (e) {
-      console.log("Error in register: ", e);
-      return null;
-    }
+  /**
+   * Authenticates a user with email and password
+   * @param userAuthData - The user's email and password
+   * @returns Promise resolving to UserCredential
+   */
+  async authenticateUser(userAuthData: UserAuthData): Promise<UserCredential> {
+    return signInWithEmailAndPassword(
+      this.firebaseAuth,
+      userAuthData.email,
+      userAuthData.password
+    );
   }
 
-  logout() {
-    return signOut(this.auth);
+  /**
+   * Gets the current authenticated user
+   * @returns The current User or null
+   */
+  getCurrentUser(): User | null {
+    return this.firebaseAuth.currentUser;
+  }
+
+  /**
+   * Initiates password reset process for a user
+   * @param userEmail - The email address for password reset
+   * @returns Promise resolving when email is sent
+   */
+
+
+  /**
+   * Signs out the current user
+   * @returns Promise resolving when sign out is complete
+   */
+  async signOutUser(): Promise<void> {
+    return signOut(this.firebaseAuth);
   }
 }
 ```
