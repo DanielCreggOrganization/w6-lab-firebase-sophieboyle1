@@ -786,6 +786,7 @@ Here is the Template for the home page
 2. Update *ngFor to @For
 3. Add the toggle ckeck box
 4. Add a sliding button to edit the Task.
+5. Add a "Logged in user: user email" to the bottom of the home page.
 
 ## Common Issues and Troubleshooting
 
