@@ -101,7 +101,7 @@ sequenceDiagram
 
 ```bash
 # Generate auth service
-ionic g service auth --standalone
+ionic g service auth
 
 # Generate login page
 ionic g page login --standalone
