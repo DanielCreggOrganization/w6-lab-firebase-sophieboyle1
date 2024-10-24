@@ -626,6 +626,7 @@ Here is the Template for the home page.
 ### DIY Tasks
 1. Add a check box to each task to toggle the task complete attribute.
 2. Add a "Logged in user: user email" to the bottom of the home page. Hint: Use an ion-text item in the footer.
+3. Add Try catch error checking to the methods in you auth and tasks services.
 
 ## Additional Resources
 
