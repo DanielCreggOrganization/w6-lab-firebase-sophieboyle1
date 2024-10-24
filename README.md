@@ -333,135 +333,173 @@ graph LR
 
 ```typescript
 // src/app/tasks.service.ts
-import { Injectable, inject } from '@angular/core'; // Used to make the service injectable.
-import { Auth, onAuthStateChanged } from '@angular/fire/auth'; // Used to get the current user and subscribe to the auth state.
+/**
+ * This file contains the TasksService which manages task data using Firebase/Firestore.
+ * It handles user authentication state and provides methods for CRUD operations on tasks.
+ */
+import { Injectable, inject } from '@angular/core';
+import { Auth, onAuthStateChanged, User } from '@angular/fire/auth';
 import {
-  addDoc, // Used to add a document to Firestore.
-  collection, // Used to create a reference to a collection in Firestore.
-  collectionData, // Used to create an observable that will emit the current value of the tasks array.
-  CollectionReference, // Used to create a reference to a collection in Firestore.
-  deleteDoc, // Used to delete a document in Firestore.
-  doc, // Used to get a reference to a document in Firestore.
-  Firestore, // Used to interact with Firestore.
-  query, // Used to create a query to get the tasks for the current user.
-  updateDoc, // Used to update a document in Firestore.
-  where, // Used to create a query to get the tasks for the current user.
-} from '@angular/fire/firestore'; // Import the functions needed to interact with Firestore.
-import { BehaviorSubject, Observable, Subscription } from 'rxjs'; // Used to create an observable that will emit the current value of the tasks array.
+  collection,
+  collectionData,
+  deleteDoc,
+  doc,
+  Firestore,
+  query,
+  updateDoc,
+  where,
+  addDoc,
+} from '@angular/fire/firestore';
+import { Observable, BehaviorSubject, switchMap, of } from 'rxjs';
 
-// Task is an interface that defines the structure of a task. The ? after the property name means that the property is optional.
+/**
+ * Interface defining the structure of a Task.
+ * @property id - Optional unique identifier (provided by Firestore)
+ * @property content - The task description or content
+ * @property completed - Boolean indicating if the task is done
+ * @property user - Optional user ID who owns the task
+ */
 export interface Task {
-  id?: string;            // The id is optional because Firestore does not store the id in the document.
+  id?: string;
   content: string;
   completed: boolean;
-  user?: string;          // The user id is optional because Firestore does not store the user id in the document.
+  user?: string;
 }
 
-// The @Injectable decorator is used to make the service injectable. The service is injected into the constructor.
-// The providedIn option is used to specify that the service should be provided in the root injector (AppModule).
-// This means that the service will be available to the entire application.
+/**
+ * Service responsible for managing tasks in the application.
+ * Uses Firebase Authentication and Firestore for data persistence.
+ */
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root', // Makes this service available throughout the app
 })
 export class TasksService {
+  // Inject Firebase services using the new inject() syntax instead of constructor injection
+  private readonly firestoreDb = inject(Firestore);
+  private readonly authService = inject(Auth);
+  
+  // Reference to the Firestore 'tasks' collection
+  private readonly tasksCollectionRef = collection(this.firestoreDb, 'tasks');
+  
+  /**
+   * BehaviorSubject keeping track of the current authenticated user.
+   * BehaviorSubject is used because it:
+   * 1. Requires an initial value (null in this case)
+   * 2. Caches the latest value
+   * 3. Emits the latest value to new subscribers
+   * 4. Ensures new subscribers get the current authentication state immediately
+   */
+  private readonly authenticatedUser$ = new BehaviorSubject<User | null>(null);
+  
+  /**
+   * Observable stream of tasks that automatically updates based on authentication state.
+   * Using switchMap because:
+   * 1. It cancels previous subscriptions when user changes (prevents memory leaks)
+   * 2. Creates a new subscription for the new user
+   * 3. Returns empty array when no user is logged in
+   * 
+   * Made readonly to prevent external code from accidentally modifying the stream
+   */
+  readonly userTasks$ = this.authenticatedUser$.pipe(
+    switchMap(user => {
+      // If no user is logged in, return an empty array
+      if (!user) return of([]);
+      
+      // Create a query that filters tasks by the current user's ID
+      const userTasksQuery = query(
+        this.tasksCollectionRef, 
+        where('user', '==', user.uid)
+      );
 
-  private firestore = inject(Firestore);
-  private auth = inject(Auth);
-
-  // Create a reference to the tasks collection. This is a reference to the collection in Firestore.
-  private collectionRef: CollectionReference;
-  // Create a BehaviorSubject observable. This stores the current value of tasks and will emit its current value to any new subscribers immediately upon subscription
-  private tasks$: BehaviorSubject<Task[]> = new BehaviorSubject<Task[]>([]);
-  // Create a subscription to the tasks collection. This is a subscription to the collection in Firestore.
-  private tasksSub!: Subscription;
+      // Return an Observable of the query results
+      // collectionData creates an Observable that emits the current value of the collection
+      // idField: 'id' adds the document ID to each task object
+      return collectionData(userTasksQuery, { idField: 'id' }) as Observable<Task[]>;
+    })
+  );
 
   constructor() {
-    // Create a reference to the tasks collection. This is a reference to the collection in Firestore.
-    this.collectionRef = collection(this.firestore, 'tasks'); // The second argument is the path to the collection in Firestore.
-    // Subscribe to the auth state. This will allow us to subscribe to the tasks collection when the user logs in.
-    this.subscribeToAuthState();
+    // Set up authentication state listener
+    // This updates authenticatedUser$ whenever the user logs in or out
+    onAuthStateChanged(this.authService, user => this.authenticatedUser$.next(user));
   }
 
   /**
-   * Subscribes to the authentication state of the application.
-   * This method is called when the authentication state changes (i.e., when a user logs in or out).
-   * If a user is logged in, it subscribes to the tasks of the logged-in user by calling `subscribeToTasks`.
-   * If no user is logged in, it unsubscribes from the tasks by calling `unsubscribeFromTasks`.
+   * Creates a new task in Firestore.
+   * @param task The task to create (without id and user)
+   * @returns Promise that resolves when the task is created
+   * @throws Error if creation fails
    */
-  private subscribeToAuthState(): void {
-    onAuthStateChanged(this.auth, (user) => { // When the authentication state changes, check if a user is logged in. 
-      if (user) { // If a user is logged in
-        this.subscribeToTasks(user.uid); // subscribe to users tasks
-      } else { // If no user is logged in 
-        this.unsubscribeFromTasks(); // unsubscribe from tasks. This will save resources and prevent errors.
-      }
-    });
-  }
-
-  private subscribeToTasks(userId: string): void {
-    // Create a query to get only the tasks for the current user.
-    const tasksQuery = query(this.collectionRef, where('user', '==', userId));
-
-    // Create an observable that will emit the current value of the tasks array.
-    const tasks$ = collectionData(tasksQuery, {
-      idField: 'id', // Include the document ID in the emitted data, under the field name 'id'.
-    }) as Observable<Task[]>; // Treat the result of collectionData as an Observable that emits arrays of Task objects
-
-    // Subscribing to an Observable. This is the process of connecting a consumer (usually a function) to the Observable.
-    // When you subscribe to an Observable, you provide a function that will be called each time the Observable emits a new value. 
-    // In this case, the function takes one argument, tasks, which will be the new value emitted by the Observable.
-    this.tasksSub = tasks$.subscribe((tasks) => {
-      this.tasks$.next(tasks); // Calling next emits a new value to its subscribers. In this case, it's emitting the tasks value that was just received from collectionSub and it's emitting it to the tasks$ BehaviorSubject.
-    });
-  }
-
-  // Clear Tasks and unsubscribe from tasks observable. This saves resources and prevents errors.
-  private unsubscribeFromTasks(): void {
-    this.tasks$.next([]); // Clear tasks by emitting an empty array to the tasks$ BehaviorSubject.
-    if (this.tasksSub) { // If there is a subscription to the tasks collection
-      this.tasksSub.unsubscribe(); // unsubscribe from the tasks collection
-    }
-  }
-
-  // Create a task and add it to the tasks collection. This will add a document to the collection on Firestore.
   async createTask(task: Task) {
     try {
-      await addDoc(this.collectionRef, { // Add a document to the collection. The first argument is the reference to the collection. The second argument is the document to add to the collection.
-        ...task, // Use the spread operator to add the task properties to the document.
-        user: this.auth.currentUser?.uid, // Add the user id to the document. This will allow us to query the tasks for the current user.
+      return await addDoc(this.tasksCollectionRef, {
+        ...task,
+        user: this.authService.currentUser?.uid, // Attach current user's ID to the task
       });
     } catch (error) {
       console.error('Error creating task:', error);
+      throw error; // Re-throw to allow handling in components
     }
   }
 
-  // Return the tasks BehaviorSubject as an observable. This will allow us to subscribe to the tasks array.
-  // The async keyword is not needed here because we are not calling to firestore.
-  readTasks() {
-    return this.tasks$.asObservable(); //returning an Observable version of the tasks$ BehaviorSubject that can be safely exposed to consumers
+  /**
+   * Returns an Observable of all tasks for the current user.
+   * The Observable automatically updates when:
+   * 1. User logs in/out
+   * 2. Tasks are added/modified/deleted
+   * @returns Observable<Task[]>
+   */
+  getUserTasks(): Observable<Task[]> {
+    return this.userTasks$;
   }
 
-  updateTask(task: Task) {
-    // Use the task id to get the reference to the document
-    const ref = doc(this.firestore, `tasks/${task.id}`);
-    // Update the document. Here we set the value of the content field to the value of the task.content
-    return updateDoc(ref, { content: task.content });
+  /**
+   * Updates an existing task's content in Firestore.
+   * @param task The task to update (must include id)
+   * @returns Promise that resolves when the update is complete
+   * @throws Error if update fails
+   */
+  async updateTask(task: Task) {
+    try {
+      const taskDocRef = doc(this.firestoreDb, `tasks/${task.id}`);
+      return await updateDoc(taskDocRef, { content: task.content });
+    } catch (error) {
+      console.error('Error updating task:', error);
+      throw error;
+    }
   }
 
+  /**
+   * Deletes a task from Firestore.
+   * @param task The task to delete (must include id)
+   * @returns Promise that resolves when the deletion is complete
+   * @throws Error if deletion fails
+   */
   async deleteTask(task: Task) {
     try {
-      // Use the task id to get the reference to the document
-      const ref = doc(this.firestore, `tasks/${task.id}`);
-      // Delete the document
-      await deleteDoc(ref);
+      const taskDocRef = doc(this.firestoreDb, `tasks/${task.id}`);
+      return await deleteDoc(taskDocRef);
     } catch (error) {
-      // Log the error to the console
-      console.error('Error deleting document: ', error);
+      console.error('Error deleting task:', error);
+      throw error;
     }
   }
 
-  // This method is used update the checkbox in the Firestore database when the user toggles the checkbox in the UI.
-
+  /**
+   * Toggles the completed status of a task in Firestore.
+   * @param task The task to toggle (must include id and completed status)
+   * @returns Promise that resolves when the update is complete
+   * @throws Error if update fails
+   */
+  async toggleTaskCompleted(task: Task) {
+    try {
+      const taskDocRef = doc(this.firestoreDb, `tasks/${task.id}`);
+      return await updateDoc(taskDocRef, { completed: task.completed });
+    } catch (error) {
+      console.error('Error toggling task:', error);
+      throw error;
+    }
+  }
 }
 ```
 
